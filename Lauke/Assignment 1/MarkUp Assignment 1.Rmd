@@ -47,3 +47,5 @@ Exactly 91 out of 100 samples cover the population value zero.
 results %>% filter(coverage == 0)
 ```
 Above table shows all samples of which the CI does not cover the population value zero. 
+
+##changing something to test this GitThing
