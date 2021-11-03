@@ -1,0 +1,17 @@
+---
+title: '1. MarkUp Assigment 2: Functions'
+author: "Lauke"
+date: "27/10/2021"
+output: html_document
+---
+
+```{r}
+error_rate <- function(observed, predicted){
+  mean(observed != predicted)
+}
+```
+
+```{r}
+save.image(file = "function.RData")
+```
+

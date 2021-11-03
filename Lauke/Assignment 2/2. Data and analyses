@@ -1,0 +1,82 @@
+---
+title: "Markup Exercise 2"
+author: "Lauke"
+date: "27/10/2021"
+output: html_document
+---
+
+# 1. Aim
+The aim of this small study is to compare the error rate of a logistic regression to that of a linear discriminant analysis (LDA). The dataset used is called `College` and is part of the ISRL package. The model we test the two different analyses on is one predicting whehter a college is a private one, based on the number of applications a college has, the price of books and the percentage of teachers at the college that have a PhD. 
+
+# 2. Set up
+
+## 2.1. Fix random seed
+```{r set global seed}
+set.seed(1796)
+```
+
+
+## 2.2. Load packages
+```{r warning=FALSE}
+library(MASS) #for lda function
+library(dplyr)
+library(magrittr)
+library(ISLR) #data
+library(mice)
+```
+
+# 3. Dataset and preparation
+## 3.1. Loading in data
+```{r}
+dat <- College %>%
+  complete() #keep complete cases only
+
+dat <- tibble::rownames_to_column(dat, "ID") #make 1st column an actual variable
+dat[,"Private"] <- if_else(dat[,"Private"] == "Yes", 1, 0) #recode dependent variable
+```
+
+## 3.2 Split into train and test sets
+```{r}
+select_vec <- rep(c("Train","Test"), length.out = nrow(dat))
+Train_test_splits <- dat %>% 
+  mutate(set = sample(select_vec))
+
+# Allocation to Train/Test sets
+train <- Train_test_splits %>% # Specify train set
+  filter(set == "Train")
+test <- Train_test_splits %>% # Specify test set
+  filter(set == "Test")
+```
+
+
+# 4. Running the analyses 
+
+## 4.1. Model of interest
+
+The model we use to compare the logistic regression and LDA on is specified as follows:
+
+$$\text{Private} = \beta_0 + \beta_1\text{Apps} + \beta2\text{Books} + \beta3\text{PhD} + \epsilon$$
+## 4.2. Logistic regression
+
+First, we train the glm model on the training data.
+```{r}
+glm <- glm(Private ~ Apps + Books + PhD, data = train, family = "binomial")
+```
+
+Then we use this model to make predictions on the test data.
+```{r}
+glm_test_predictions <- predict(glm, newdata = test, type = "reponse") #method = response b/c Private is a 0/1 variable. 
+```
+
+## 4.3. LDA
+Now, we train the LDA model on the training data.
+```{r}
+lda <- lda(Private ~ Apps + Books + PhD, data = train)
+```
+
+```{r}
+test_lda_predictions <- predict(model_lda, newdata = test)$class
+```
+
+
+
