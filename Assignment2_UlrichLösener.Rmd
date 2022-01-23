@@ -1,0 +1,46 @@
+---
+title: "Assignment 2"
+author: "Ulrich Lösener"
+date: "12 1 2022"
+output: html_document
+---
+
+Packages
+```{r}
+library(dplyr)
+library(purrr)
+
+```
+
+We will use the "cars" data to run a linear regression model. Then we will obtain bootstrapped estimates and their confidence intervals. We will check how many confidence intervals cover the "true" parameters.
+```{r}
+set.seed(123)
+
+# linear regression
+reg <- lm(dist ~ speed, cars)
+summary(reg)
+
+# Bootstrapping
+nsim <- 1000
+sim <- replicate(nsim, cars[sample(1:50, 50, replace=TRUE), ], simplify = FALSE)
+
+# Determine bias
+model <- sim %>% map(~ lm(dist ~ speed, data = cars))
+estimates <- model %>% map(coef) %>% do.call(rbind, args = .) 
+
+# Bootstrap estimates
+estimates %>% colMeans
+
+# CIs
+ci <- model %>% map(confint)
+
+# How many cover the "true" model parameter?
+cover <- ci %>% 
+  map(function(x) x[, 1] <= coef(reg) & coef(reg) <= x[, 2]) %>%
+  do.call(rbind, args = .)
+
+# any CI not covering the true parameter? Nope
+"FALSE" %in% cover 
+
+```
+
