@@ -1,0 +1,51 @@
+---
+title: "MarkUp Assignment 1"
+author: "Lauke"
+date: "25/09/2021"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+```
+
+ 
+```{r Sample 1000 samples form a standard normal distribution}
+set.seed(1796)
+nsim <- 100
+mean <- matrix(NA, nsim, 1)
+bias <- matrix(NA, nsim, 1)
+SE <- matrix(NA, nsim, 1)
+INT <- matrix(NA, nsim, 1)
+low.CI <- matrix(NA, nsim, 1)
+upp.CI <- matrix(NA, nsim, 1)
+coverage <- matrix(NA, nsim, 1)
+
+
+for (i in 1:nsim){
+  samp <- rnorm(1200, 0, 1)
+  df <- length(samp) - 1 
+  
+  mean[i] <- mean(samp)
+  bias[i] <- mean(samp) - 0
+  SE[i] <- sd(samp)/sqrt(length(samp))
+  INT[i] <- qt(.975, df) * SE[i]
+  low.CI[i] <- mean[i] - INT[i]
+  upp.CI[i] <- mean[i] + INT[i]
+  coverage[i] <- low.CI[i] < 0 & 0 < upp.CI[i]
+}
+
+results <- cbind(mean, bias, SE, low.CI, upp.CI, coverage)
+colnames(results) <- c("mean", "bias", "SE", "low.CI", "upp.CI", "coverage")
+results <- as.data.frame(results)
+
+as.table(colMeans(results))
+```
+Exactly 91 out of 100 samples cover the population value zero. 
+
+```{r }
+results %>% filter(coverage == 0)
+```
+Above table shows all samples of which the CI does not cover the population value zero. 
+
+##changing something to test this GitThing
